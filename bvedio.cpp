@@ -83,13 +83,6 @@ void bvedio::initHeader()
 
     }
     codec_ctx->time_base = { 1, params.frame_rate };
-    //codec_ctx->bit_rate = 4000000;
-    
-    /*codec_ctx->framerate = { 30,1 };
-    codec_ctx->time_base = { 1, params.frame_rate };
-    codec_ctx->framerate = { params.frame_rate, 1 };
-    codec_ctx->gop_size = 10;
-    codec_ctx->max_b_frames = 1;*/
     if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
         //std::cerr << "无法打开编码器" << std::endl;
         avcodec_free_context(&codec_ctx);
@@ -107,31 +100,7 @@ void bvedio::initHeader()
         throw std::runtime_error("无法设置流的编解码器参数");
     }
 
-    // 打开输出文件
-    //if (!(format_ctx->oformat->flags & AVFMT_NOFILE)) {
-    //    if (avio_open(&format_ctx->pb, "out.mp4", AVIO_FLAG_WRITE) < 0) {
-    //        //std::cerr << "无法打开输出文件" << std::endl;
-    //        avcodec_free_context(&codec_ctx);
-    //        avcodec_parameters_free(&codec_params);
-    //        avformat_free_context(format_ctx);
-    //        throw std::runtime_error("无法打开输出文件");
-    //    }
-    //}
-    //// 写入文件头
-    //format_ctx->streams[0]->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
-    //av_dict_set_int(&opt, "video_track_timescale", 30, 0);
-    ////format_ctx->video_codec_id = codec->id;
-    ////format_ctx->video_codec = codec;
-    //int ret = avformat_write_header(format_ctx, &opt);
-    //if (ret < 0) {
-    //    //std::cerr << "无法写入文件头" << std::endl;
-    //    avcodec_free_context(&codec_ctx);
-    //    avcodec_parameters_free(&codec_params);
-    //    avformat_free_context(format_ctx);
-    //    throw std::runtime_error("无法写入文件头");
-    //}
 
-    //initAudioStream();
 
 }
 
@@ -185,8 +154,6 @@ int bvedio::loop()
 
         
 
-        //std::cout << y_stride * params.height + u_stride * (params.height / 2) + v_stride * (params.height / 2) << std::endl;
-        //captureinstance->grab_windows();
         sc->Capture(buffer.data());
         libyuv::ARGBToI420(
             (const uint8_t*)buffer.data(), params.width*4,
@@ -219,9 +186,6 @@ int bvedio::loop()
         if (avcodec_send_frame(codec_ctx, current_frame) < 0) {
             std::cerr << "无法发送帧给编码器" << std::endl;
             av_frame_free(&current_frame);
-            /*avcodec_free_context(&codec_ctx);
-            avcodec_parameters_free(&codec_params);
-            avformat_free_context(format_ctx);*/
             return -1;
         }
 
@@ -235,9 +199,7 @@ int bvedio::loop()
                 //throw std::runtime_error("无法写入编码数据到文件");
                 av_packet_unref(pkt);
                 av_frame_free(&current_frame);
-                /*avcodec_free_context(&codec_ctx);
-                avcodec_parameters_free(&codec_params);
-                avformat_free_context(format_ctx);*/
+
                 return -1;
             }
             av_packet_unref(pkt);
@@ -277,11 +239,6 @@ int bvedio::loop()
         av_packet_unref(pkt);
     }
     av_frame_free(&current_frame);
-    //avcodec_flush_buffers(codec_ctx);
-    //if (av_write_trailer(format_ctx) < 0) {
-    //    //std::cerr << "无法写入文件尾" << std::endl;
-    //    throw std::runtime_error("无法写入文件尾");
-    //}
     delete[] yuv420;
     stop_flag.store(true);
     return 1;
@@ -292,102 +249,9 @@ int bvedio::loop()
 
 
 
-//void bvedio::recordLoop() {
-//    int frame_count = 0;
-//    int audio_frame_index = 0;
-//    while (frame_count < times * params.frame_rate) {
-//        captureFrame(frame_count);
-//        frame_count++;
-//        // 更新音频帧索引
-//    }
-//}
-
-
-//
-//void bvedio::captureFrame(int frame_count)
-//{
-//    // 填充 YUV 数据（这里假设你已经有了 YUV 数据）
-//        // 替换下面的代码以填充实际的 YUV 数据
-//        //std::vector<uint8_t> yuv_data(width * height * 3 / 2, 0); // 假设这里创建了 YUV 数据
-//
-//        //// 将 YUV 数据填充到帧中
-//        //int y_size = width * height;
-//        //frame->data[0] = yuv_data.data();
-//        //frame->data[1] = yuv_data.data() + y_size;
-//        //frame->data[2] = yuv_data.data() + y_size * 5 / 4;
-//        //frame->linesize[0] = width;
-//        //frame->linesize[1] = width / 2;
-//        //frame->linesize[2] = width / 2;
-//    Sleep(1000 / params.frame_rate);
-//
-//    int y_stride = params.width;
-//    int u_stride = (params.width + 1) / 2;
-//    int v_stride = (params.width + 1) / 2;
-//    uint8_t* yuv420 = new uint8_t[y_stride * params.height + u_stride * (params.height / 2) + v_stride * (params.height / 2)];
-//
-//    //std::cout << y_stride * params.height + u_stride * (params.height / 2) + v_stride * (params.height / 2) << std::endl;
-//    //CaptureScreenOrWindow(hWnd, yuv420, y_stride, u_stride, v_stride);
-//    //if (frame_count == 5) {
-//    //    writeYUVToFile("output.yuv", yuv420, params.width, params.height);
-//    //}
-//    convertYUVToAVFrame(yuv420, params.width, params.height, y_stride, u_stride, v_stride, current_frame);
-//    //std::cout << sizeof(yuv420) << std::endl;
-//    delete[] yuv420;
-//    if (!current_frame) {
-//        fprintf(stderr, "Error converting YUV to AVFrame\n");
-//
-//        return ;
-//    }
-//
-//
-//
-//    //ShootScreen(hWnd, frame);
-//    // 设置帧的时间戳
-//    current_frame->pts = frame_count;
-//
-//    // 发送帧给编码器
-//    if (avcodec_send_frame(codec_ctx, current_frame) < 0) {
-//        std::cerr << "无法发送帧给编码器" << std::endl;
-//        av_frame_free(&current_frame);
-//        /*avcodec_free_context(&codec_ctx);
-//        avcodec_parameters_free(&codec_params);
-//        avformat_free_context(format_ctx);*/
-//        return ;
-//    }
-//
-//    // 从编码器接收编码数据并写入文件
-//    AVPacket pkt;
-//    av_init_packet(&pkt);
-//    pkt.data = nullptr;
-//    pkt.size = 0;
-//    if (avcodec_receive_packet(codec_ctx, &pkt) == 0) {
-//        if (av_interleaved_write_frame(format_ctx, &pkt) < 0) {
-//            //std::cerr << "无法写入编码数据到文件" << std::endl;
-//            throw std::runtime_error("无法写入编码数据到文件");
-//            av_packet_unref(&pkt);
-//            av_frame_free(&current_frame);
-//            /*avcodec_free_context(&codec_ctx);
-//            avcodec_parameters_free(&codec_params);
-//            avformat_free_context(format_ctx);*/
-//            return ;
-//        }
-//        av_packet_unref(&pkt);
-//    }
-//    //av_packet_unref(&pkt);
-//    
-//    av_frame_free(&current_frame);
-//}
 
 void bvedio::endLoop()
 {
-    //int ret = av_write_trailer(format_ctx);
-    //if(ret < 0) {
-    //    //std::cerr << "无法写入文件尾" << std::endl;
-    //    throw std::runtime_error("无法写入文件尾");
-    //}
-
-    // 释放资源
-    //av_frame_free(&frame);
     avcodec_free_context(&codec_ctx);
     avcodec_parameters_free(&this->codec_params);
     avformat_free_context(format_ctx);

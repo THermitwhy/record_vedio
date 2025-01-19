@@ -99,16 +99,7 @@ private:
         }
 
 
-        // 打开输出文件
-        //if (!(audio_format->oformat->flags & AVFMT_NOFILE)) {
-        //    if (avio_open(&audio_format->pb, output_filename, AVIO_FLAG_WRITE) < 0) {
-        //        //std::cerr << "无法打开输出文件" << std::endl;
-        //        avcodec_free_context(&audio_codec_context);
-        //        avcodec_parameters_free(&audio_par);
-        //        avformat_free_context(audio_format);
-        //        throw std::runtime_error("无法打开输出文件");
-        //    }
-        //}
+
 
         audio_frame = av_frame_alloc();
         audio_packet = av_packet_alloc();
@@ -126,15 +117,6 @@ private:
         }
         sample_data.resize(audio_frame->nb_samples * audio_frame->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP));
         sample_data2.resize(audio_frame->nb_samples * audio_frame->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP));
-        // 写入文件头
-        //if (avformat_write_header(audio_format, nullptr) < 0) {
-        //    //std::cerr << "无法写入文件头" << std::endl;
-        //    avcodec_free_context(&audio_codec_context);
-        //    avcodec_parameters_free(&audio_par);
-        //    avformat_free_context(audio_format);
-        //    return;
-        //    //throw std::runtime_error("无法写入文件头");
-        //}
 
     }
     void f32le_convert_to_fltp(float* f32le, float* fltp, int nb_samples) {

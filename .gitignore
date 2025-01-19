@@ -1,1 +1,7 @@
 /out
+/main.cpp
+/.vs
+/last30.h
+/last30.cpp
+/CMakePresets.json
+/baudio.hpp
